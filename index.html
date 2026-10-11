@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The System - Daily Quests</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#050a18;--panel:#0b1530;--line:#1f4fd8;--glow:#4aa8ff;--text:#d6e6ff;--dim:#7e93bd;--bad:#ff5a6e;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;min-height:100%}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:18px;letter-spacing:4px;text-align:center;color:var(--glow);text-shadow:0 0 12px var(--glow);margin:8px 0 16px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:14px;box-shadow:0 0 14px rgba(31,79,216,.35)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rank{font-size:30px;font-weight:700;color:var(--glow);text-shadow:0 0 10px var(--glow)}
+.dim{color:var(--dim);font-size:13px}
+.bar{height:12px;background:#0a1228;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:8px 0 4px}
+.bar>div{height:100%;background:linear-gradient(90deg,#1f4fd8,#4aa8ff);width:0;transition:width .5s}
+.stats{display:flex;gap:8px;margin-top:10px}
+.stats div{flex:1;text-align:center;border:1px solid var(--line);border-radius:6px;padding:6px;font-size:13px}
+.stats b{display:block;font-size:20px;color:var(--glow)}
+.add{display:flex;gap:6px;flex-wrap:wrap}
+input,select,button{font:inherit;color:var(--text);background:#0a1228;border:1px solid var(--line);border-radius:6px;padding:9px}
+input{flex:1;min-width:140px}
+button{cursor:pointer;background:var(--line);border-color:var(--glow)}
+button:hover{filter:brightness(1.25)}
+.task{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #12254f}
+.task:last-child{border:0}
+.task.done .nm{text-decoration:line-through;color:var(--dim)}
+.nm{flex:1}
+.tag{font-size:12px;border:1px solid var(--glow);border-radius:4px;padding:1px 6px;color:var(--glow)}
+.x{background:none;border:0;color:var(--bad);padding:4px 8px}
+.timer{text-align:center}
+.time{font-size:44px;font-weight:700;letter-spacing:3px;text-shadow:0 0 12px var(--glow)}
+.row{display:flex;gap:8px;justify-content:center;margin-top:8px}
+#pop{position:fixed;left:50%;top:18%;transform:translateX(-50%) scale(.9);background:var(--panel);border:2px solid var(--glow);border-radius:6px;padding:16px 22px;text-align:center;box-shadow:0 0 30px var(--glow);opacity:0;pointer-events:none;transition:.3s;z-index:9;max-width:90%}
+#pop.show{opacity:1;transform:translateX(-50%) scale(1)}
+#pop small{color:var(--glow);letter-spacing:2px}
+.sh{display:inline-block;margin:3px;padding:4px 10px;border:1px solid #7a3cff;border-radius:4px;color:#c9a8ff;background:#150a30;box-shadow:0 0 8px #5a1fd0}
+@keyframes fl{0%{box-shadow:inset 0 0 140px #4aa8ff}100%{box-shadow:inset 0 0 0 transparent}}
+body.flash{animation:fl .9s}
+#arise{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 55%,#2a0a66 0%,#07031a 70%);opacity:0;pointer-events:none;transition:opacity .6s}
+#arise.on{opacity:1;pointer-events:auto}
+.aw{font-size:clamp(44px,15vw,120px);font-weight:800;letter-spacing:.25em;margin-right:-.25em;color:#e9dcff;text-shadow:0 0 20px #8a4dff,0 0 60px #6a2cff,0 0 120px #5a1fd0;opacity:0}
+.on .aw{animation:aw 3.6s ease-out forwards}
+@keyframes aw{0%{transform:scale(.6);opacity:0;filter:blur(14px)}40%{opacity:1;filter:blur(0)}100%{transform:scale(1.1);opacity:1}}
+.an{margin-top:18px;font-size:16px;letter-spacing:6px;color:#b99cff;text-align:center;opacity:0}
+.on .an{animation:an 3.6s ease forwards}
+@keyframes an{0%,50%{opacity:0;transform:translateY(10px)}75%,100%{opacity:1;transform:none}}
+#arise.on{animation:sk .6s .9s}
+@keyframes sk{0%,100%{transform:translate(0)}20%{transform:translate(-8px,4px)}40%{transform:translate(7px,-5px)}60%{transform:translate(-5px,-3px)}80%{transform:translate(4px,5px)}}
+.wrap{position:relative;z-index:1}
+.box{background:rgba(11,21,48,.82);backdrop-filter:blur(2px)}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,#1a0b4d 0%,#050a18 68%)}
+#bg svg.f{position:absolute;bottom:-3%;width:auto;aspect-ratio:100/220;filter:drop-shadow(0 0 14px #6a2cff);animation:fl2 8s ease-in-out infinite}
+#bg .s1{left:-5%;height:70vh;opacity:.55}
+#bg .s2{right:-5%;height:76vh;opacity:.55;animation-delay:-3s}
+#bg .s3{left:24%;height:40vh;opacity:.28;animation-delay:-5s}
+#bg .s4{right:26%;height:44vh;opacity:.3;animation-delay:-2s}
+#bg .s5{left:47%;height:28vh;opacity:.18;animation-delay:-6s}
+@keyframes fl2{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.mist{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 90%,rgba(110,60,255,.28),transparent 55%),radial-gradient(ellipse at 80% 85%,rgba(40,120,255,.22),transparent 55%);animation:ms 12s ease-in-out infinite alternate}
+@keyframes ms{from{opacity:.5;transform:scale(1)}to{opacity:1;transform:scale(1.08)}}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true">
+<svg width="0" height="0" style="position:absolute"><defs><symbol id="sd" viewBox="0 0 100 220"><path fill="#0a0420" d="M34 38Q34 8 50 6Q66 8 66 38Q60 46 50 46Q40 46 34 38Z"/><path fill="#0a0420" d="M22 72Q50 48 78 72L90 205Q50 218 10 205Z"/><path fill="#0a0420" d="M87 50h5v150h-5z"/><path fill="#0a0420" d="M82 100h15v5H82z"/><ellipse cx="44" cy="32" rx="3.5" ry="2" fill="#b58cff"/><ellipse cx="56" cy="32" rx="3.5" ry="2" fill="#b58cff"/></symbol></defs></svg>
+<div class="mist"></div>
+<svg class="f s5" viewBox="0 0 100 220"><use href="#sd"/></svg>
+<svg class="f s3" viewBox="0 0 100 220"><use href="#sd"/></svg>
+<svg class="f s4" viewBox="0 0 100 220"><use href="#sd"/></svg>
+<svg class="f s1" viewBox="0 0 100 220"><use href="#sd"/></svg>
+<svg class="f s2" viewBox="0 0 100 220"><use href="#sd"/></svg>
+</div>
+<div class="wrap">
+<h1>[ THE SYSTEM ]</h1>
+
+<div class="box">
+  <div class="top"><div><div class="dim">HUNTER RANK</div><div class="rank" id="rank">E</div></div>
+  <div style="text-align:right"><div class="dim">LEVEL</div><div class="rank" id="lvl">1</div></div></div>
+  <div class="bar"><div id="xpbar"></div></div>
+  <div class="dim" id="xptxt"></div><div class="dim" id="streak"></div>
+  <div class="stats"><div>STR<b id="str">0</b></div><div>INT<b id="int">0</b></div><div>AGI<b id="agi">0</b></div></div>
+</div>
+
+<div class="box">
+  <div class="dim" style="margin-bottom:8px">NEW QUEST</div>
+  <div class="add">
+    <input id="name" placeholder="e.g. Study math for 1 hour" maxlength="60">
+    <select id="cat"><option value="int">Study (INT)</option><option value="str">Fitness (STR)</option><option value="agi">Work (AGI)</option></select>
+    <select id="diff"><option>E</option><option>D</option><option>C</option><option>B</option><option>A</option><option>S</option></select>
+    <button id="addBtn">Add</button>
+  </div>
+  <div class="dim" style="margin-top:6px">Harder rank = more XP. Unfinished quests from yesterday cost you 10 XP each (Penalty).</div>
+</div>
+
+<div class="box">
+  <div class="top"><div class="dim">DAILY QUESTS</div><button id="clearDone" style="padding:5px 10px;font-size:13px">Clear finished</button></div>
+  <div id="list"></div>
+</div>
+
+<div class="box"><div class="dim">SHADOW ARMY (<span id="armyc">0</span>)</div><div id="army" style="margin-top:8px"></div></div>
+
+<div class="box timer">
+  <div class="dim">DUNGEON GATE (FOCUS TIMER)</div>
+  <div class="time" id="time">25:00</div>
+  <div class="row"><select id="len"><option value="15">15 min</option><option value="25" selected>25 min</option><option value="50">50 min</option></select><button id="start">Enter Gate</button><button id="reset">Reset</button></div>
+  <div class="dim" style="margin-top:6px">Clear the gate for XP and +1 INT. Longer gates give more XP.</div>
+</div>
+</div>
+<div id="arise"><div class="aw">ARISE</div><div class="an"></div></div>
+<div id="pop"></div>
+
+<script>
+var XP={E:10,D:20,C:40,B:70,A:100,S:150};
+var RANKS=[[1,"E"],[5,"D"],[10,"C"],[20,"B"],[35,"A"],[50,"S"]];
+var KEY="system_quests_v1";
+var st={xp:0,level:1,stats:{str:0,int:0,agi:0},tasks:[],day:today()};
+
+function ymd(o){var d=new Date(Date.now()-o*864e5);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function today(){return ymd(0)}
+function load(){try{var s=localStorage.getItem(KEY);if(s)st=JSON.parse(s)}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+var AC=null;
+function beep(f){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;o.type="sine";g.gain.value=.08;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.4);o.stop(AC.currentTime+.4)}catch(e){}}
+function need(l){return 100*l}
+function rankOf(l){var r="E";RANKS.forEach(function(x){if(l>=x[0])r=x[1]});return r}
+
+function pop(title,msg){
+  var p=document.getElementById("pop");
+  p.innerHTML="<small>["+title+"]</small><div style='margin-top:6px;font-size:18px'>"+msg+"</div>";
+  p.classList.add("show");clearTimeout(pop.t);pop.t=setTimeout(function(){p.classList.remove("show")},2200);
+}
+
+function gain(n,stat){
+  st.xp+=n;if(stat)st.stats[stat]++;
+  while(st.xp>=need(st.level)){st.xp-=need(st.level);st.level++;pop("LEVEL UP","You are now level "+st.level+" - Rank "+rankOf(st.level));beep(990);document.body.classList.remove("flash");void document.body.offsetWidth;document.body.classList.add("flash")}
+}
+
+function penalty(){
+  var t=today();
+  if(st.day!==t){if(st.lastWin!==ymd(1))st.streak=0;
+    var missed=st.tasks.filter(function(k){return !k.done}).length;
+    st.tasks=[];st.day=t;
+    if(missed){
+      st.xp-=10*missed;
+      while(st.xp<0&&st.level>1){st.level--;st.xp+=need(st.level)}
+      if(st.xp<0)st.xp=0;
+      setTimeout(function(){pop("PENALTY","You missed "+missed+" quest(s): -"+10*missed+" XP")},400);
+    }
+    save();
+  }
+}
+
+function render(){
+  document.getElementById("rank").textContent=rankOf(st.level);
+  document.getElementById("lvl").textContent=st.level;
+  document.getElementById("xpbar").style.width=(100*st.xp/need(st.level))+"%";
+  document.getElementById("xptxt").textContent="XP "+st.xp+" / "+need(st.level);
+  document.getElementById("str").textContent=st.stats.str;
+  document.getElementById("int").textContent=st.stats.int;
+  document.getElementById("agi").textContent=st.stats.agi;
+  document.getElementById("streak").textContent="Streak: "+st.streak+" day(s)"+(st.streak?" (+"+Math.min(50,10*st.streak)+"% quest XP)":"");
+  document.getElementById("army").innerHTML=st.shadows.length?st.shadows.map(function(s){return "<span class='sh'>"+s+"</span>"}).join(""):"<span class='dim'>No shadows yet. Complete 3 quests to extract your first one.</span>";
+  document.getElementById("armyc").textContent=st.shadows.length;
+  var l=document.getElementById("list");l.innerHTML="";
+  if(!st.tasks.length){l.innerHTML="<div class='dim' style='padding:10px 0'>No quests yet. Add your first one above.</div>"}
+  st.tasks.forEach(function(k,i){
+    var d=document.createElement("div");d.className="task"+(k.done?" done":"");
+    var c=document.createElement("input");c.type="checkbox";c.checked=k.done;c.disabled=k.done;c.style.flex="0";
+    c.onchange=function(){toggle(i)};
+    var n=document.createElement("span");n.className="nm";n.textContent=k.name;
+    var t=document.createElement("span");t.className="tag";t.textContent=k.diff+"-Rank +"+XP[k.diff];
+    var x=document.createElement("button");x.className="x";x.textContent="x";x.onclick=function(){st.tasks.splice(i,1);save();render()};
+    d.appendChild(c);d.appendChild(n);d.appendChild(t);d.appendChild(x);l.appendChild(d);
+  });
+}
+
+var ARISE_JP="立て";
+function ariseSound(){try{
+  AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.resume)AC.resume();
+  var t=AC.currentTime,M=AC.createGain();M.gain.value=.9;M.connect(AC.destination);
+  var L=AC.sampleRate*2.8,ib=AC.createBuffer(2,L,AC.sampleRate);
+  for(var c=0;c<2;c++){var d=ib.getChannelData(c);for(var i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.5)}
+  var rv=AC.createConvolver();rv.buffer=ib;var rg=AC.createGain();rg.gain.value=.7;rv.connect(rg);rg.connect(M);
+  var bus=AC.createGain();bus.connect(M);bus.connect(rv);
+  function swell(type,f,peak,end,lp){var o=AC.createOscillator(),g=AC.createGain(),fl=AC.createBiquadFilter();o.type=type;o.frequency.value=f;fl.type="lowpass";fl.frequency.value=lp;
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+1.5);g.gain.exponentialRampToValueAtTime(.0001,t+end);
+    o.connect(fl);fl.connect(g);g.connect(bus);o.start(t);o.stop(t+end+.1)}
+  function noise(sec){var b=AC.createBuffer(1,AC.sampleRate*sec,AC.sampleRate),d=b.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;var s=AC.createBufferSource();s.buffer=b;return s}
+  swell("sawtooth",55,.3,4.5,220);swell("sine",41,.5,4.5,120);
+  swell("sawtooth",110,.07,4.2,520);swell("sawtooth",130.8,.06,4.2,520);swell("sawtooth",164.8,.06,4.2,520);
+  var r=noise(1.6),bp=AC.createBiquadFilter(),rgn=AC.createGain();bp.type="bandpass";bp.Q.value=2;
+  bp.frequency.setValueAtTime(150,t);bp.frequency.exponentialRampToValueAtTime(3500,t+1.5);
+  rgn.gain.setValueAtTime(.0001,t);rgn.gain.exponentialRampToValueAtTime(.35,t+1.5);rgn.gain.exponentialRampToValueAtTime(.0001,t+1.6);
+  r.connect(bp);bp.connect(rgn);rgn.connect(bus);r.start(t);
+  var im=AC.createOscillator(),ig=AC.createGain();im.type="sine";im.frequency.setValueAtTime(120,t+1.5);im.frequency.exponentialRampToValueAtTime(28,t+2.4);
+  ig.gain.setValueAtTime(.0001,t+1.45);ig.gain.linearRampToValueAtTime(.9,t+1.5);ig.gain.exponentialRampToValueAtTime(.0001,t+3);
+  im.connect(ig);ig.connect(bus);im.start(t+1.45);im.stop(t+3.1);
+  var nb=noise(.8),lp=AC.createBiquadFilter(),ng=AC.createGain();lp.type="lowpass";lp.frequency.value=800;
+  ng.gain.setValueAtTime(.0001,t+1.45);ng.gain.linearRampToValueAtTime(.6,t+1.5);ng.gain.exponentialRampToValueAtTime(.0001,t+2.3);
+  nb.connect(lp);lp.connect(ng);ng.connect(bus);nb.start(t+1.45);
+}catch(e){}
+  setTimeout(function(){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(ARISE_JP);u.lang="ja-JP";var vs=speechSynthesis.getVoices().filter(function(v){return v.lang&&v.lang.toLowerCase().indexOf("ja")===0});if(vs.length)u.voice=vs[0];u.pitch=0;u.rate=.6;u.volume=1;speechSynthesis.speak(u)}catch(e){}},1450);
+}
+function arise(n){
+  var o=document.getElementById("arise");o.querySelector(".an").textContent=n.toUpperCase()+" - SHADOW SOLDIER";
+  o.classList.remove("on");void o.offsetWidth;o.classList.add("on");
+  o.onclick=function(){o.classList.remove("on");try{speechSynthesis.cancel()}catch(e){}};
+  clearTimeout(arise.t);arise.t=setTimeout(function(){o.classList.remove("on")},4600);
+}
+var SH=["Igris","Iron","Tank","Tusk","Beru","Greed","Jima","Kaisel","Bellion","Fangs","Kamish","Baran"];
+function extract(){var n=SH[st.shadows.length%SH.length]+(st.shadows.length>=SH.length?" II":"");st.shadows.push(n);setTimeout(function(){arise(n);save()},1200)}
+function clearDay(){
+  var t=today();if(st.lastWin===t)return;
+  st.streak=(st.lastWin===ymd(1))?st.streak+1:1;st.lastWin=t;
+  setTimeout(function(){gain(50,null);beep(880);pop("DAILY QUEST CLEARED","+50 XP - Streak "+st.streak+" day(s)");save();render()},900);
+}
+function toggle(i){
+  var k=st.tasks[i];
+  if(k.done)return;
+  k.done=true;var bonus=Math.round(XP[k.diff]*Math.min(.5,.1*st.streak));var g=XP[k.diff]+bonus;
+  gain(g,k.cat);beep(660);pop("QUEST COMPLETE","+"+g+" XP"+(bonus?" (streak bonus)":""));
+  st.total++;if(st.total%3===0)extract();
+  if(st.tasks.length>=2&&st.tasks.every(function(t){return t.done}))clearDay();
+
+  save();render();
+}
+
+document.getElementById("addBtn").onclick=function(){
+  var n=document.getElementById("name");var v=n.value.trim();if(!v)return;
+  st.tasks.push({name:v,cat:document.getElementById("cat").value,diff:document.getElementById("diff").value,done:false});
+  n.value="";save();render();
+};
+document.getElementById("name").addEventListener("keydown",function(e){if(e.key==="Enter")document.getElementById("addBtn").click()});
+
+document.getElementById("clearDone").onclick=function(){
+  var n=st.tasks.filter(function(k){return k.done}).length;
+  if(!n){pop("SYSTEM","No finished quests to clear");return}
+  st.tasks=st.tasks.filter(function(k){return !k.done});save();render();pop("SYSTEM",n+" finished quest(s) cleared");
+};
+var left=1500,iv=null;function len(){return +document.getElementById("len").value}
+function showTime(){var m=Math.floor(left/60),s=left%60;document.getElementById("time").textContent=(m<10?"0":"")+m+":"+(s<10?"0":"")+s}
+document.getElementById("start").onclick=function(){
+  if(iv)return;
+  iv=setInterval(function(){
+    left--;showTime();
+    if(left<=0){clearInterval(iv);iv=null;left=len()*60;showTime();var gx=Math.round(len()*1.2);gain(gx,"int");beep(880);pop("GATE CLEARED","+"+gx+" XP");save();render()}
+  },1000);
+};
+document.getElementById("reset").onclick=function(){clearInterval(iv);iv=null;left=len()*60;showTime()};
+document.getElementById("len").onchange=function(){if(!iv){left=len()*60;showTime()}};
+
+load();st.shadows=st.shadows||[];st.total=st.total||0;st.streak=st.streak||0;st.lastWin=st.lastWin||"";penalty();render();showTime();
+</script>
+</body>
+</html>
