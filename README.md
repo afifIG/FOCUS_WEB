@@ -12,7 +12,7 @@ I built "The System: Daily Quests":
 
 Built with plain HTML, CSS and JavaScript, and designed with AI as my learning partner.
 
-Try it here:
+Try it here:https://focuswime.netlify.app/
 
 
 I'd love your feedback and ideas for the next feature. What would you add?
